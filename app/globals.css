@@ -103,11 +103,6 @@ body::after {
   animation: fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
 }
 
-.animate-fade-up-delay-2 {
-  opacity: 0;
-  animation: fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
-}
-
 .animate-fade-in {
   animation: fadeIn 0.7s ease forwards;
 }

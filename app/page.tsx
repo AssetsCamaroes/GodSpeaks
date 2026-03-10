@@ -50,25 +50,6 @@ const Ornament = ({ opacity = 1 }: { opacity?: number }) => (
   </svg>
 );
 
-const CornerFrame = ({ size = 18, flip = false }: { size?: number; flip?: boolean }) => {
-  const s = flip ? -1 : 1;
-  return (
-    <svg
-      width={size} height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      fill="none" xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d={`M0 ${size} L0 0 L${size} 0`}
-        stroke="rgba(200,164,90,0.55)"
-        strokeWidth="1.5"
-        transform={`scale(${s},1) translate(${flip ? -size : 0},0)`}
-        fill="none"
-      />
-    </svg>
-  );
-};
-
 const FrameCorners = ({ offset = -10 }: { offset?: number }) => (
   <>
     {/* top-left */}

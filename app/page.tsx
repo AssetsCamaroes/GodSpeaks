@@ -143,8 +143,10 @@ export default function Home() {
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `Request failed: ${res.status}`);
+        const body = await res.json().catch(() => ({}));
+        // Handle structured error envelope: { error: { code, message } }
+        const msg = body?.error?.message ?? body?.error ?? `Request failed: ${res.status}`;
+        throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
       }
 
       const verseText   = decodeURIComponent(res.headers.get("X-Verse-Text")     || "");

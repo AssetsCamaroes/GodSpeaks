@@ -4,7 +4,7 @@
   "private": true,
   "description": "Generate stunning spiritual images with random Bible and Quran verses",
   "scripts": {
-    "dev": "next dev",
+    "dev": "portless run next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

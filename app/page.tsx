@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { truncateWords } from "@/lib/prompt";
 
 type Source = "bible" | "quran";
 type Language = "en" | "fr";
@@ -458,7 +459,7 @@ export default function Home() {
                   letterSpacing: "0.02em",
                 }}
               >
-                &ldquo;{verse.text.slice(0, 160)}{verse.text.length > 160 ? "…" : ""}&rdquo;
+                &ldquo;{truncateWords(verse.text, 25)}&rdquo;
               </p>
               <p
                 style={{

@@ -168,7 +168,7 @@ export default function Home() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: "5rem 1.5rem",
+        padding: "clamp(2.5rem, 8vw, 5rem) clamp(1rem, 4vw, 1.5rem)",
         position: "relative",
         zIndex: 1,
       }}
@@ -211,7 +211,7 @@ export default function Home() {
         <p
           style={{
             ...serif,
-            fontSize: "0.82rem",
+            fontSize: "0.875rem",
             fontStyle: "italic",
             fontWeight: 300,
             color: "var(--parchment-dim)",
@@ -252,8 +252,8 @@ export default function Home() {
                 onClick={() => setLanguage(lang)}
                 style={{
                   ...serif,
-                  padding: "0.5rem 2rem",
-                  fontSize: "0.8rem",
+                  padding: "0.75rem 2rem",
+                  fontSize: "0.875rem",
                   fontWeight: 500,
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
@@ -283,7 +283,7 @@ export default function Home() {
             <span
               style={{
                 ...serif,
-                fontSize: "0.68rem",
+                fontSize: "0.75rem",
                 letterSpacing: "0.28em",
                 textTransform: "uppercase",
                 color: "var(--parchment-dim)",
@@ -438,6 +438,7 @@ export default function Home() {
                   color: "var(--parchment)",
                   marginBottom: "1rem",
                   letterSpacing: "0.02em",
+                  wordBreak: "break-word",
                 }}
               >
                 &ldquo;{truncateWords(verse.text, 25)}&rdquo;
@@ -445,11 +446,12 @@ export default function Home() {
               <p
                 style={{
                   ...serif,
-                  fontSize: "0.8rem",
+                  fontSize: "0.875rem",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: "var(--gold)",
                   fontWeight: 500,
+                  wordBreak: "break-word",
                 }}
               >
                 — {verse.reference}
@@ -459,29 +461,21 @@ export default function Home() {
 
           {/* Download */}
           <button
+            className="btn-download"
             onClick={handleDownload}
             style={{
               ...serif,
               marginTop: "1.75rem",
               width: "100%",
               padding: "0.875rem",
-              fontSize: "0.82rem",
+              fontSize: "0.875rem",
               fontWeight: 400,
               letterSpacing: "0.22em",
               textTransform: "uppercase",
               cursor: "pointer",
-              transition: "all 0.3s ease",
               background: "transparent",
               color: "var(--gold)",
               border: "1px solid var(--border)",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(200,164,90,0.4)";
-              (e.currentTarget as HTMLButtonElement).style.background = "rgba(200,164,90,0.05)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border)";
-              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
             }}
           >
             {t.download}
@@ -497,7 +491,7 @@ export default function Home() {
         <p
           style={{
             ...serif,
-            fontSize: "0.72rem",
+            fontSize: "0.75rem",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: "var(--parchment-dim)",

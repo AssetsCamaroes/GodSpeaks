@@ -18,7 +18,8 @@
 ```json
 {
   "source": "bible | quran",
-  "language": "en | fr"
+  "language": "en | fr",
+  "style": "gothic-clay | cinematic | sketch | mystic-fight | surreal | oil-painting  (optional, default: gothic-clay)"
 }
 ```
 

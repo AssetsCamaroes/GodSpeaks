@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { truncateWords } from "@/lib/prompt";
+import { truncateWords, IMAGE_STYLES, STYLE_LABELS, type ImageStyle } from "@/lib/prompt";
 
 type Source = "bible" | "quran";
 type Language = "en" | "fr";
@@ -15,22 +15,24 @@ interface VerseMetadata {
 
 const LABELS = {
   en: {
-    subtitle: "Divine verses, beautifully rendered",
-    fromThe: "from the",
-    generate: "Receive a Verse",
-    generating: "Seeking wisdom…",
-    download: "Save this Image",
-    error: "Something went wrong. Please try again.",
-    footer: "Each vision is uniquely woven by AI",
+    subtitle:  "Divine verses, beautifully rendered",
+    fromThe:   "from the",
+    styleOf:   "in the style of",
+    generate:  "Receive a Verse",
+    generating:"Seeking wisdom…",
+    download:  "Save this Image",
+    error:     "Something went wrong. Please try again.",
+    footer:    "Each vision is uniquely woven by AI",
   },
   fr: {
-    subtitle: "Versets divins, magnifiquement illustrés",
-    fromThe: "tiré de",
-    generate: "Recevoir un Verset",
-    generating: "En quête de sagesse…",
-    download: "Sauvegarder l'Image",
-    error: "Une erreur est survenue. Réessayez.",
-    footer: "Chaque vision est tissée de manière unique par l'IA",
+    subtitle:  "Versets divins, magnifiquement illustrés",
+    fromThe:   "tiré de",
+    styleOf:   "dans le style",
+    generate:  "Recevoir un Verset",
+    generating:"En quête de sagesse…",
+    download:  "Sauvegarder l'Image",
+    error:     "Une erreur est survenue. Réessayez.",
+    footer:    "Chaque vision est tissée de manière unique par l'IA",
   },
 };
 
@@ -104,6 +106,7 @@ const Spinner = () => (
 export default function Home() {
   const [source, setSource]   = useState<Source>("bible");
   const [language, setLanguage] = useState<Language>("en");
+  const [style, setStyle]     = useState<ImageStyle>("gothic-clay");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState<string | null>(null);
@@ -121,7 +124,7 @@ export default function Home() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source, language }),
+        body: JSON.stringify({ source, language, style }),
       });
 
       if (!res.ok) {
@@ -144,15 +147,15 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [source, language, t.error]);
+  }, [source, language, style, t.error]);
 
   const handleDownload = useCallback(() => {
     if (!imageUrl) return;
     const a = document.createElement("a");
     a.href = imageUrl;
-    a.download = `godspeaks-${source}-${language}-${Date.now()}.png`;
+    a.download = `godspeaks-${source}-${language}-${style}-${Date.now()}.png`;
     a.click();
-  }, [imageUrl, source, language]);
+  }, [imageUrl, source, language, style]);
 
   // ─── shared style tokens ────────────────────────────────────────────────
   const serif: React.CSSProperties = {
@@ -317,6 +320,65 @@ export default function Home() {
                 }}
               >
                 {s === "bible" ? (language === "fr" ? "Bible" : "Bible") : language === "fr" ? "Coran" : "Quran"}
+              </button>
+            ))}
+          </div>
+
+          {/* "in the style of" label */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              marginBottom: "0.875rem",
+            }}
+          >
+            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+            <span
+              style={{
+                ...serif,
+                fontSize: "0.75rem",
+                letterSpacing: "0.28em",
+                textTransform: "uppercase",
+                color: "var(--parchment-dim)",
+                fontStyle: "italic",
+              }}
+            >
+              {t.styleOf}
+            </span>
+            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+          </div>
+
+          {/* Style picker — 3×2 grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "0.5rem",
+              marginBottom: "2rem",
+            }}
+          >
+            {IMAGE_STYLES.map((s) => (
+              <button
+                key={s}
+                onClick={() => setStyle(s)}
+                style={{
+                  ...serif,
+                  minHeight: "44px",
+                  padding: "0.5rem 0.25rem",
+                  fontSize: "0.75rem",
+                  fontWeight: style === s ? 500 : 300,
+                  fontStyle: style === s ? "italic" : "normal",
+                  letterSpacing: "0.06em",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  transition: "all 0.25s ease",
+                  background: style === s ? "rgba(200,164,90,0.1)" : "transparent",
+                  color: style === s ? "var(--gold-bright)" : "var(--parchment-dim)",
+                  border: `1px solid ${style === s ? "var(--border-active)" : "var(--border)"}`,
+                }}
+              >
+                {STYLE_LABELS[s][language]}
               </button>
             ))}
           </div>

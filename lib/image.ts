@@ -11,18 +11,18 @@
 import { GoogleGenAI } from "@google/genai";
 import sharp from "sharp";
 import type { Verse } from "./verse";
-import { buildImagenPrompt } from "./prompt";
+import { buildImagenPrompt, type ImageStyle } from "./prompt";
 
 const SIZE = 1024;
 
 // ─── Background Generation ──────────────────────────────────────────────────
 
-export async function generateBackground(verse: Verse): Promise<Buffer> {
+export async function generateBackground(verse: Verse, style: ImageStyle = "gothic-clay"): Promise<Buffer> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY not set in .env");
 
     const ai     = new GoogleGenAI({ apiKey });
-    const prompt = buildImagenPrompt(verse); // uses full verse text
+    const prompt = buildImagenPrompt(verse, style); // uses full verse + style
 
     const response = await ai.models.generateContent({
         model:    "gemini-2.5-flash-image",

@@ -1,6 +1,6 @@
 /**
  * POST /api/generate
- *   Body:    { source: "bible" | "quran", language: "en" | "fr" }
+ *   Body:    { source: "bible" | "quran", language: "en" | "fr", style?: ImageStyle }
  *   Returns: PNG image (1024×1024) with verse metadata in response headers
  *
  * GET /api/generate
@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { fetchRandomVerse } from "@/lib/verse";
 import { generateBackground, compositeImage } from "@/lib/image";
 import { makeError, sanitizeError } from "@/lib/errors";
+import { IMAGE_STYLES, type ImageStyle } from "@/lib/prompt";
 
 const ALLOWED_SOURCES   = ["bible", "quran"] as const;
 const ALLOWED_LANGUAGES = ["en", "fr"]       as const;
@@ -28,8 +29,9 @@ export async function GET() {
             method:      "POST",
             contentType: "application/json",
             body: {
-                source:   { type: "string", required: true, values: ALLOWED_SOURCES },
-                language: { type: "string", required: true, values: ALLOWED_LANGUAGES },
+                source:   { type: "string", required: true,  values: ALLOWED_SOURCES },
+                language: { type: "string", required: true,  values: ALLOWED_LANGUAGES },
+                style:    { type: "string", required: false, values: IMAGE_STYLES, default: "gothic-clay" },
             },
         },
         response: {
@@ -43,6 +45,7 @@ export async function GET() {
                     "X-Verse-Reference": "URL-encoded scripture reference",
                     "X-Verse-Source":    "'bible' or 'quran'",
                     "X-Verse-Language":  "'en' or 'fr'",
+                    "X-Verse-Style":     "Image style used for generation",
                 },
             },
             error: {
@@ -53,6 +56,7 @@ export async function GET() {
                     MISSING_FIELD:    "A required body field was not provided",
                     INVALID_SOURCE:   "source must be 'bible' or 'quran'",
                     INVALID_LANGUAGE: "language must be 'en' or 'fr'",
+                    INVALID_STYLE:    `style must be one of: ${IMAGE_STYLES.join(", ")}`,
                     GENERATION_FAILED:"Image generation pipeline failed",
                     INTERNAL_ERROR:   "Unexpected server-side error",
                 },
@@ -78,7 +82,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { source, language } = body;
+        const { source, language, style } = body;
 
         // ── Validate: presence ──────────────────────────────────────────────
         if (source === undefined || source === null) {
@@ -116,9 +120,26 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // ── Validate: style (optional, defaults to "gothic-clay") ───────────
+        const resolvedStyle: ImageStyle =
+            style === undefined || style === null
+                ? "gothic-clay"
+                : (style as ImageStyle);
+
+        if (style !== undefined && style !== null && !IMAGE_STYLES.includes(resolvedStyle)) {
+            return NextResponse.json(
+                makeError(
+                    "INVALID_STYLE",
+                    `'style' must be one of: ${IMAGE_STYLES.join(", ")}`,
+                    { field: "style", requestId }
+                ),
+                { status: 400 }
+            );
+        }
+
         // ── Pipeline ────────────────────────────────────────────────────────
         const verse      = await fetchRandomVerse(source as Source, language as Language);
-        const background = await generateBackground(verse);
+        const background = await generateBackground(verse, resolvedStyle);
         const finalImage = await compositeImage(background, verse);
 
         // ── Respond with image ──────────────────────────────────────────────
@@ -126,13 +147,14 @@ export async function POST(request: NextRequest) {
             status: 200,
             headers: {
                 "Content-Type":        "image/png",
-                "Content-Disposition": `inline; filename="godspeaks-${source}-${language}.png"`,
+                "Content-Disposition": `inline; filename="godspeaks-${source}-${language}-${resolvedStyle}.png"`,
                 "Cache-Control":       "no-store",
                 "X-Request-Id":        requestId,
                 "X-Verse-Text":        encodeURIComponent(verse.text.slice(0, 200)),
                 "X-Verse-Reference":   encodeURIComponent(verse.reference),
                 "X-Verse-Source":      verse.source,
                 "X-Verse-Language":    verse.language,
+                "X-Verse-Style":       resolvedStyle,
             },
         });
 

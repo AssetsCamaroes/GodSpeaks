@@ -9,6 +9,7 @@ export type ErrorCode =
     | "MISSING_FIELD"
     | "INVALID_SOURCE"
     | "INVALID_LANGUAGE"
+    | "INVALID_STYLE"
     | "GENERATION_FAILED"
     | "INTERNAL_ERROR";
 

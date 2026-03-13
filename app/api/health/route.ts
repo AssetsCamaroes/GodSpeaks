@@ -7,16 +7,17 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-    const geminiConfigured = Boolean(process.env.GEMINI_API_KEY);
+    const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
     return NextResponse.json(
         {
             status:    "ok",
             timestamp: new Date().toISOString(),
+            backend:   "convex",
             services: {
-                gemini: {
-                    configured: geminiConfigured,
-                    note:       geminiConfigured ? "API key present" : "GEMINI_API_KEY not set",
+                convex: {
+                    url:  convexUrl || "not configured",
+                    note: convexUrl ? "Self-hosted Convex backend" : "NEXT_PUBLIC_CONVEX_URL not set",
                 },
                 bible: {
                     provider: "ibibles.net",
@@ -30,9 +31,8 @@ export async function GET() {
                 },
             },
             api: {
-                "POST /api/generate": "Generate a spiritual image from a random verse",
-                "GET  /api/generate": "API schema and documentation",
-                "GET  /api/health":   "This endpoint",
+                "Convex action generate:create": "Generate a spiritual image from a random verse (primary)",
+                "GET /api/health": "This endpoint",
             },
         },
         {

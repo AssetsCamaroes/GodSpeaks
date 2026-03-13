@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ConvexClientProvider } from "./ConvexClientProvider";
 import "./globals.css";
 
 const SITE_URL  = process.env.NEXT_PUBLIC_SITE_URL || "https://godspeaks.com";
@@ -96,7 +97,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <ConvexClientProvider>{children}</ConvexClientProvider>
+      </body>
     </html>
   );
 }

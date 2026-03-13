@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useAction } from "convex/react";
+import { api } from "../convex/_generated/api";
 import { truncateWords, IMAGE_STYLES, STYLE_LABELS, type ImageStyle } from "@/lib/prompt";
 
 type Source = "bible" | "quran";
@@ -112,6 +114,7 @@ export default function Home() {
   const [error, setError]       = useState<string | null>(null);
   const [verse, setVerse]       = useState<VerseMetadata | null>(null);
 
+  const generateAction = useAction(api.generate.create);
   const t = LABELS[language];
 
   const handleGenerate = useCallback(async () => {
@@ -121,33 +124,21 @@ export default function Home() {
     setVerse(null);
 
     try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source, language, style }),
+      const result = await generateAction({ source, language, style });
+
+      setVerse({
+        text: result.verse.text,
+        reference: result.verse.reference,
+        source: result.verse.source as Source,
+        language: result.verse.language as Language,
       });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        // Handle structured error envelope: { error: { code, message } }
-        const msg = body?.error?.message ?? body?.error ?? `Request failed: ${res.status}`;
-        throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
-      }
-
-      const verseText   = decodeURIComponent(res.headers.get("X-Verse-Text")     || "");
-      const verseRef    = decodeURIComponent(res.headers.get("X-Verse-Reference") || "");
-      const verseSource = (res.headers.get("X-Verse-Source")   || source)   as Source;
-      const verseLang   = (res.headers.get("X-Verse-Language") || language) as Language;
-
-      setVerse({ text: verseText, reference: verseRef, source: verseSource, language: verseLang });
-      const blob = await res.blob();
-      setImageUrl(URL.createObjectURL(blob));
+      setImageUrl(result.imageUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : t.error);
     } finally {
       setLoading(false);
     }
-  }, [source, language, style, t.error]);
+  }, [source, language, style, t.error, generateAction]);
 
   const handleDownload = useCallback(() => {
     if (!imageUrl) return;
